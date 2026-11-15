@@ -1,0 +1,20 @@
+# MPLAB X build output
+build/
+dist/
+debug/
+.generated_files/
+*.o
+*.o.d
+*.elf
+*.hex
+*.map
+
+# MPLAB X per-user settings
+nbproject/private/
+nbproject/Makefile-*.mk
+nbproject/Makefile-genesis.properties
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+.vscode/
