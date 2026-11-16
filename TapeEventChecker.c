@@ -131,7 +131,7 @@ uint8_t CheckTape(void) {
         returnVal = TRUE;
         lastBits = bits;
 #ifndef EVENTCHECKER_TEST           // keep this as is for test harness
-        PostGenericService(thisEvent);
+        PostTapeService(thisEvent);
 #else
         SaveEvent(thisEvent);
 #endif   
@@ -139,27 +139,7 @@ uint8_t CheckTape(void) {
     return (returnVal);
 }
 
-/* 
- * The Test Harness for the event checkers is conditionally compiled using
- * the EVENTCHECKER_TEST macro (defined either in the file or at the project level).
- * No other main() can exist within the project.
- * 
- * It requires a valid ES_Configure.h file in the project with the correct events in 
- * the enum, and the correct list of event checkers in the EVENT_CHECK_LIST.
- * 
- * The test harness will run each of your event detectors identically to the way the
- * ES_Framework will call them, and if an event is detected it will print out the function
- * name, event, and event parameter. Use this to test your event checking code and
- * ensure that it is fully functional.
- * 
- * If you are locking up the output, most likely you are generating too many events.
- * Remember that events are detectable changes, not a state in itself.
- * 
- * Once you have fully tested your event checking code, you can leave it in its own
- * project and point to it from your other projects. If the EVENTCHECKER_TEST marco is
- * defined in the project, no changes are necessary for your event checkers to work
- * with your other projects.
- */
+
 #ifdef EVENTCHECKER_TEST
 #include <stdio.h>
 static uint8_t(*EventList[])(void) = {EVENT_CHECK_LIST};
