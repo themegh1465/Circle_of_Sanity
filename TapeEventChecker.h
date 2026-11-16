@@ -21,12 +21,12 @@
  ******************************************************************************/
 
 // bitmask the tape sensors 
-#define TAPE_FC 0x01
-#define TAPE_E 0x02
-#define TAPE_FL 0x04
-#define TAPE_RL 0x08
-#define TAPE_FR 0x10
-#define TAPE_RR 0x20
+#define TAPE_FC 0x01 // 0000 0001
+#define TAPE_E 0x02 // 0000 0010
+#define TAPE_FL 0x04 // 0000 0100
+#define TAPE_RL 0x08 // 0000 1000
+#define TAPE_FR 0x10 // 0001 0000
+#define TAPE_RR 0x20 // 0010 0000
 
 
 
