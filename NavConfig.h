@@ -28,6 +28,9 @@
 #define TURN_EXTRA_DEG 20
 #define TURN_SAFETY_DEG 120
 
+#define APPROACH_SPEED 700 // looking for tape speed
+#define APPROACH_GUARD_MS 20000 // longer than it should take to cross the field, if nothign seen within then, then loststop
+#define ACQ_TURN_MAX_DEG 60 // most TurnToTape will pivot before giving up and creeping
 
 #endif	/* NAVCONFIG_H */
 

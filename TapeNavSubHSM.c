@@ -47,6 +47,8 @@ typedef enum {
             CornerSettle,
             CornerTurn,
             LostStop,
+            Approach,
+            TurnToTape,
 } TapeNavSubHSMState_t;
 
 static const char *StateNames[] = {
@@ -56,6 +58,8 @@ static const char *StateNames[] = {
     "CornerSettle",
     "CornerTurn",
     "LostStop",
+    "Approach",
+    "TurnToTape",
 };
 
 // last seen inline or an edge
@@ -83,6 +87,7 @@ static TapeNavSubHSMState_t CurrentState = InitPSubState; // <- change name to m
 static LastSeen_t lastSeen = INLINE_SEEN;
 static uint8_t MyPriority;
 static uint32_t turnStart = 0; // ms for when the pivot started
+static uint8_t pivotLeft = FALSE; // TurnToTape direction, true = CCW if FL hit first, false = CW if FR hit first
 
 /*******************************************************************************
  * PUBLIC FUNCTIONS                                                            *
@@ -147,10 +152,86 @@ ES_Event RunTapeNavSubHSM(ES_Event ThisEvent)
     case InitPSubState: // If current state is initial Psedudo State
         if (ThisEvent.EventType == ES_INIT)// only respond to ES_Init
         {
-            // now put the machine into the actual initial state
-            nextState = Follow;
+            // now put the machine into the actual initial state based on the tape reading
+            if (Tape_GetBits() & (TAPE_FL | TAPE_RL)){
+                nextState = Follow;
+            } else {
+                nextState = Approach;
+            }
             makeTransition = TRUE;
             ThisEvent.EventType = ES_NO_EVENT;
+        }
+        break;
+        
+    // APPROACH STATE
+        
+    case Approach: // drive straight until we see any tape
+        switch(ThisEvent.EventType){
+            case ES_ENTRY:
+                Motor_Forward(APPROACH_SPEED);
+                ES_Timer_InitTimer(NAV_GUARD_TIMER, APPROACH_GUARD_MS);
+                ThisEvent.EventType = ES_NO_EVENT;
+                break;
+            case TAPE_CHANGED:
+                if (rose & (TAPE_FL | TAPE_FR)){
+                    if (current & TAPE_FC){
+                        nextState = CornerToEdge; // FC was on the tape and FL or FR went off means we hit a corner and we creep to edge
+                    } else {
+                    pivotLeft = (rose & TAPE_FL) ? TRUE : FALSE;
+                    nextState = TurnToTape;
+                    }
+                    makeTransition = TRUE;
+                }
+                ThisEvent.EventType = ES_NO_EVENT;
+                break;
+            case ES_TIMEOUT:
+                if (ThisEvent.EventParam == NAV_GUARD_TIMER){
+                    nextState = LostStop;
+                    makeTransition = TRUE;
+                    ThisEvent.EventType = ES_NO_EVENT;
+                }
+                break;
+            case ES_EXIT:
+                ES_Timer_StopTimer(NAV_GUARD_TIMER);
+                break;
+            default:
+                break;
+        }
+        break;
+        
+    // TURNTOTAPE STATE
+        
+    case TurnToTape:
+        switch(ThisEvent.EventType){
+            case ES_ENTRY:
+                if(pivotLeft){
+                    Motor_PivotCCW(PIVOT_SPEED);
+                } else {
+                    Motor_PivotCW(PIVOT_SPEED);
+                }
+                ES_Timer_InitTimer(NAV_GUARD_TIMER, deg_to_ms(ACQ_TURN_MAX_DEG));
+                ThisEvent.EventType = ES_NO_EVENT;
+                break;
+            case TAPE_CHANGED:
+                if (rose & TAPE_FC){
+                    nextState = CornerToEdge;
+                    makeTransition = TRUE;
+                }
+                ThisEvent.EventType = ES_NO_EVENT;
+                break;
+            case ES_TIMEOUT:
+                if (ThisEvent.EventParam == NAV_GUARD_TIMER){
+                    nextState = CornerToEdge;
+                    makeTransition = TRUE;
+                    ThisEvent.EventType = ES_NO_EVENT;
+                }
+                break;
+            case ES_EXIT:
+                Motor_Brake();
+                ES_Timer_StopTimer(NAV_GUARD_TIMER);
+                break;
+            default:
+                break;
         }
         break;
         
@@ -161,6 +242,9 @@ ES_Event RunTapeNavSubHSM(ES_Event ThisEvent)
             case ES_ENTRY:
                 lastSeen = INLINE_SEEN;
                 Steer(TapeService_GetBits());
+                if (!(TapeService_GetBits() & (TAPE_RL | TAPE_FL | TAPE_E))) {
+                    ES_Timer_InitTimer(NAV_LOST_TIMER, LOST_MS);
+                }
                 ThisEvent.EventType = ES_NO_EVENT;
                 break;
         
@@ -173,10 +257,14 @@ ES_Event RunTapeNavSubHSM(ES_Event ThisEvent)
                 }
                 
                 // ideally either FC or FR go off:
-                // only FC: then we have seen corner move to the cornertoedge state
+                // only FC: is just us drifting onto our own tape or clipping a cross arm, ignore it
                 // only FR: FC is already past the tape go to corner settle state
-                if (rose & (TAPE_FC | TAPE_FR)){
-                    nextState = CornerToEdge;
+                if (rose & TAPE_FR){
+                    if (current & TAPE_FC) {
+                        nextState = CornerToEdge; // normal: FC still on the corner tape, creep until it falls
+                    } else {
+                        nextState = CornerSettle; // came in angled right, FC already crossed the tape
+                    }
                     makeTransition = TRUE;
                 } else {
                     // just continue if its not the sensors we care about
@@ -201,7 +289,7 @@ ES_Event RunTapeNavSubHSM(ES_Event ThisEvent)
                 
             case ES_TIMEOUT:
                 if (ThisEvent.EventParam == NAV_LOST_TIMER && !(TapeService_GetBits() & (TAPE_RL | TAPE_FL | TAPE_E))){
-                    nextState = LostStop;
+                    nextState = Approach;
                     makeTransition = TRUE;
                     ThisEvent.EventType = ES_NO_EVENT;
                 }
@@ -239,7 +327,7 @@ ES_Event RunTapeNavSubHSM(ES_Event ThisEvent)
                 
             case ES_TIMEOUT:
                 if (ThisEvent.EventParam == NAV_GUARD_TIMER){
-                    nextState = LostStop;
+                    nextState = Approach;
                     makeTransition = TRUE;
                     ThisEvent.EventType = ES_NO_EVENT;
                 }
@@ -292,13 +380,6 @@ ES_Event RunTapeNavSubHSM(ES_Event ThisEvent)
                 ES_Timer_InitTimer(NAV_GUARD_TIMER, deg_to_ms(TURN_SAFETY_DEG));
                 ThisEvent.EventType = ES_NO_EVENT;
                 break;
-            case ES_TIMEOUT:
-                if(ThisEvent.EventParam == NAV_MOTION_TIMER){ // stop the 90 degree turn and then go straight back to follow state
-                    nextState = Follow;
-                    makeTransition = TRUE;
-                    ThisEvent.EventType = ES_NO_EVENT;
-                }
-                break;
             case TAPE_CHANGED:
                 if ((changed & ~current & TAPE_FC) && (ES_Timer_GetTime() - turnStart) > deg_to_ms(TURN_MIN_DEG)){
                     ES_Timer_StopTimer(NAV_GUARD_TIMER);
@@ -317,7 +398,7 @@ ES_Event RunTapeNavSubHSM(ES_Event ThisEvent)
                     makeTransition = TRUE;
                     ThisEvent.EventType = ES_NO_EVENT;
                 } else if (ThisEvent.EventParam == NAV_GUARD_TIMER){  //FC never fell
-                    nextState = LostStop;
+                    nextState = Approach;
                     makeTransition = TRUE;
                     ThisEvent.EventType = ES_NO_EVENT;
                 }
