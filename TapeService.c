@@ -7,6 +7,7 @@
 #include "ES_Configure.h"
 #include "ES_Framework.h"
 #include "TapeService.h"
+#include "TopHSM.h"
 #include <stdio.h>
 
 /*******************************************************************************
@@ -66,6 +67,9 @@ uint8_t PostTapeService(ES_Event ThisEvent)
     return ES_PostToService(MyPriority, ThisEvent);
 }
 
+uint8_t TapeService_GetBits(void){
+    return stableBits;
+}
 
 ES_Event RunTapeService(ES_Event ThisEvent)
 {
@@ -97,8 +101,9 @@ ES_Event RunTapeService(ES_Event ThisEvent)
             PostEvent.EventType = TAPE_CHANGED;
             PostEvent.EventParam = ((uint16_t) (pendingBits ^ stableBits) << 8) | pendingBits;
             stableBits = pendingBits;
+            
 #ifndef SIMPLESERVICE_TEST           // keep this as is for test harness
-            PostGenericService(PostEvent);
+            PostTopHSM(PostEvent);
 #else
             PostTapeService(PostEvent);
 #endif   

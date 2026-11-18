@@ -4,6 +4,9 @@
 #include "ES_Configure.h"
 #include "ES_Framework.h"
 #include "TapeEventChecker.h"
+#include "motor.h"
+#include "NavConfig.h"
+#include <AD.h>
 
 void main(void)
 {
@@ -17,6 +20,7 @@ void main(void)
 
     // Your hardware initialization function calls go here
     AD_Init();
+    Motor_Init();
     TapeEventChecker_Init();
     
     // now initialize the Events and Services Framework and start it running
@@ -39,7 +43,7 @@ void main(void)
     }
     for (;;)
         ;
-
+    
 };
 
 /*------------------------------- Footnotes -------------------------------*/

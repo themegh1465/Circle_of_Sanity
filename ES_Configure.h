@@ -87,9 +87,9 @@ static const char *EventNames[] = {
 // a timers, then you can use TIMER_UNUSED
 #define TIMER_UNUSED ((pPostFunc)0)
 #define TIMER0_RESP_FUNC PostTapeService
-#define TIMER1_RESP_FUNC TIMER_UNUSED
-#define TIMER2_RESP_FUNC TIMER_UNUSED
-#define TIMER3_RESP_FUNC TIMER_UNUSED
+#define TIMER1_RESP_FUNC PostTopHSM
+#define TIMER2_RESP_FUNC PostTopHSM
+#define TIMER3_RESP_FUNC PostTopHSM
 #define TIMER4_RESP_FUNC TIMER_UNUSED
 #define TIMER5_RESP_FUNC TIMER_UNUSED
 #define TIMER6_RESP_FUNC TIMER_UNUSED
@@ -111,6 +111,9 @@ static const char *EventNames[] = {
 // the timer number matches where the timer event will be routed
 
 #define TAPE_DEBOUNCE_TIMER 0 /*make sure this is enabled above and posting to the correct state machine*/
+#define NAV_MOTION_TIMER 1
+#define NAV_GUARD_TIMER 2
+#define NAV_LOST_TIMER 3
 
 
 /****************************************************************************/
@@ -122,7 +125,7 @@ static const char *EventNames[] = {
 /****************************************************************************/
 // This macro determines that nuber of services that are *actually* used in
 // a particular application. It will vary in value from 1 to MAX_NUM_SERVICES
-#define NUM_SERVICES 2
+#define NUM_SERVICES 3
 
 /****************************************************************************/
 // These are the definitions for Service 0, the lowest priority service
@@ -154,13 +157,13 @@ static const char *EventNames[] = {
 // These are the definitions for Service 2
 #if NUM_SERVICES > 2
 // the header file with the public function prototypes
-#define SERV_2_HEADER "TestService.h"
+#define SERV_2_HEADER "TopHSM.h"
 // the name of the Init function
-#define SERV_2_INIT TestServiceInit
+#define SERV_2_INIT InitTopHSM
 // the name of the run function
-#define SERV_2_RUN TestServiceRun
+#define SERV_2_RUN RunTopHSM
 // How big should this services Queue be?
-#define SERV_2_QUEUE_SIZE 3
+#define SERV_2_QUEUE_SIZE 10
 #endif
 
 

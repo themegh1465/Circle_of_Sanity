@@ -1,0 +1,162 @@
+
+digraph fsm {
+
+    // header
+    // rankdir=LR;
+InitPSubState[shape = "point", color = "black",style="filled",width=.1,forcelabels=false];
+
+    // states
+    node [shape=plaintext]
+
+    Follow [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" style="rounded">
+        <TR>
+            <TD BORDER="1" SIDES="B">Follow</TD>
+        </TR>
+        <TR>
+            <TD ALIGN="LEFT"><B>/Entry: </B></TD>
+        </TR>
+        <TR><TD ALIGN="LEFT">                lastSeen = INLINE_SEEN;</TD></TR>
+        <TR><TD ALIGN="LEFT">                Steer(TapeService_GetBits());</TD></TR>
+        <TR><TD ALIGN="LEFT">                ThisEvent.EventType = ES_NO_EVENT;</TD></TR>
+        <TR>
+            <TD ALIGN="LEFT"><B>/Exit: </B></TD>
+        </TR>
+<TR><TD ALIGN="LEFT">                ES_Timer_StopTimer(NAV_LOST_TIMER);</TD></TR>
+</TABLE>>];
+
+
+    CornerToEdge [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" style="rounded">
+        <TR>
+            <TD BORDER="1" SIDES="B">CornerToEdge</TD>
+        </TR>
+        <TR>
+            <TD ALIGN="LEFT"><B>/Entry: </B></TD>
+        </TR>
+        <TR><TD ALIGN="LEFT">                Motor_Forward(CORNER_SPEED);</TD></TR>
+        <TR><TD ALIGN="LEFT">                ES_Timer_InitTimer(NAV_GUARD_TIMER, CORNER_GUARD_MS);</TD></TR>
+        <TR><TD ALIGN="LEFT">                ThisEvent.EventType = ES_NO_EVENT;</TD></TR>
+        <TR>
+            <TD ALIGN="LEFT"><B>/Exit: </B></TD>
+        </TR>
+<TR><TD ALIGN="LEFT">                ES_Timer_StopTimer(NAV_GUARD_TIMER);</TD></TR>
+</TABLE>>];
+
+
+    CornerSettle [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" style="rounded">
+        <TR>
+            <TD BORDER="1" SIDES="B">CornerSettle</TD>
+        </TR>
+        <TR>
+            <TD ALIGN="LEFT"><B>/Entry: </B></TD>
+        </TR>
+        <TR><TD ALIGN="LEFT">                Motor_Brake();</TD></TR>
+        <TR><TD ALIGN="LEFT">                ES_Timer_InitTimer(NAV_MOTION_TIMER, SETTLE_MS);</TD></TR>
+        <TR><TD ALIGN="LEFT">                ThisEvent.EventType = ES_NO_EVENT;</TD></TR>
+        <TR>
+            <TD ALIGN="LEFT"><B>/Exit: </B></TD>
+        </TR>
+</TABLE>>];
+
+
+    CornerTurn [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" style="rounded">
+        <TR>
+            <TD BORDER="1" SIDES="B">CornerTurn</TD>
+        </TR>
+        <TR>
+            <TD ALIGN="LEFT"><B>/Entry: </B></TD>
+        </TR>
+        <TR><TD ALIGN="LEFT">                Motor_PivotCW(PIVOT_SPEED);</TD></TR>
+        <TR><TD ALIGN="LEFT">                ES_Timer_InitTimer(NAV_MOTION_TIMER, deg_to_ms(90));</TD></TR>
+        <TR><TD ALIGN="LEFT">                ThisEvent.EventType = ES_NO_EVENT;</TD></TR>
+        <TR>
+            <TD ALIGN="LEFT"><B>/Exit: </B></TD>
+        </TR>
+<TR><TD ALIGN="LEFT">                Motor_Brake();</TD></TR>
+<TR><TD ALIGN="LEFT">                ES_Timer_StopTimer(NAV_MOTION_TIMER);</TD></TR>
+</TABLE>>];
+
+
+    LostStop [label=<<TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" style="rounded">
+        <TR>
+            <TD BORDER="1" SIDES="B">LostStop</TD>
+        </TR>
+        <TR>
+            <TD ALIGN="LEFT"><B>/Entry: </B></TD>
+        </TR>
+        <TR><TD ALIGN="LEFT">            Motor_Brake();</TD></TR>
+        <TR>
+            <TD ALIGN="LEFT"><B>/Exit: </B></TD>
+        </TR>
+</TABLE>>];
+
+
+    // guards
+
+    194 [shape=point, xlabel="                if (rose & (TAPE_FC | TAPE_FR)){
+"];
+
+    195 [shape=point, xlabel="                    nextState = (current & TAPE_FC) ? CornerToEdge : CornerSettle;
+"];
+
+    210 [shape=point, xlabel="                if (ThisEvent.EventParam == NAV_LOST_TIMER && !(TapeService_GetBits() & (TAPE_RL | TAPE_FL | TAPE_E))){
+"];
+
+    231 [shape=point, xlabel="                if (changed & ~current & TAPE_FC) {
+"];
+
+    // transitions
+InitPSubState -> Follow[label=<<TABLE BORDER="0" CELLBORDER="0">
+        <TR><TD BORDER="1" SIDES="B">ES_INIT</TD></TR>
+        </TABLE>>];
+
+Follow -> 194[label=<<TABLE BORDER="0" CELLBORDER="0">
+        <TR><TD BORDER="1" SIDES="B">TAPE_CHANGED</TD></TR>
+            <TR><TD ALIGN="LEFT">                if (current &amp; TAPE_E){</TD></TR>
+            <TR><TD ALIGN="LEFT">                    lastSeen = EDGE_SEEN;</TD></TR>
+            <TR><TD ALIGN="LEFT">                } else if (current &amp; (TAPE_RL | TAPE_FL)){</TD></TR>
+            <TR><TD ALIGN="LEFT">                    lastSeen = INLINE_SEEN;</TD></TR>
+            <TR><TD ALIGN="LEFT">                }</TD></TR>
+        </TABLE>>];
+
+194 -> 195[label=<<TABLE BORDER="0" CELLBORDER="0">
+        <TR><TD BORDER="1" SIDES="B">TRUE</TD></TR>
+        </TABLE>>];
+
+195 -> CornerToEdge[label=<<TABLE BORDER="0" CELLBORDER="0">
+        <TR><TD BORDER="1" SIDES="B">TRUE</TD></TR>
+        </TABLE>>];
+
+195 -> CornerSettle[label=<<TABLE BORDER="0" CELLBORDER="0">
+        <TR><TD BORDER="1" SIDES="B">FALSE</TD></TR>
+        </TABLE>>];
+
+Follow -> 210[label=<<TABLE BORDER="0" CELLBORDER="0">
+        <TR><TD BORDER="1" SIDES="B">(ES_TIMEOUT)(NAV_LOST_TIMER)</TD></TR>
+        </TABLE>>];
+
+210 -> LostStop[label=<<TABLE BORDER="0" CELLBORDER="0">
+        <TR><TD BORDER="1" SIDES="B">TRUE</TD></TR>
+        </TABLE>>];
+
+CornerToEdge -> 231[label=<<TABLE BORDER="0" CELLBORDER="0">
+        <TR><TD BORDER="1" SIDES="B">TAPE_CHANGED</TD></TR>
+        </TABLE>>];
+
+231 -> CornerSettle[label=<<TABLE BORDER="0" CELLBORDER="0">
+        <TR><TD BORDER="1" SIDES="B">TRUE</TD></TR>
+        </TABLE>>];
+
+CornerToEdge -> LostStop[label=<<TABLE BORDER="0" CELLBORDER="0">
+        <TR><TD BORDER="1" SIDES="B">(ES_TIMEOUT)(NAV_GUARD_TIMER)</TD></TR>
+        </TABLE>>];
+
+CornerSettle -> CornerTurn[label=<<TABLE BORDER="0" CELLBORDER="0">
+        <TR><TD BORDER="1" SIDES="B">(ES_TIMEOUT)(NAV_MOTION_TIMER)</TD></TR>
+        </TABLE>>];
+
+CornerTurn -> Follow[label=<<TABLE BORDER="0" CELLBORDER="0">
+        <TR><TD BORDER="1" SIDES="B">(ES_TIMEOUT)(NAV_MOTION_TIMER)</TD></TR>
+        </TABLE>>];
+
+
+}

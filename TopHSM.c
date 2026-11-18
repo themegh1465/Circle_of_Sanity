@@ -32,7 +32,8 @@
 #include "ES_Framework.h"
 #include "BOARD.h"
 #include "TopHSM.h"
-#include "TemplateSubHSM.h" //#include all sub state machines called
+#include "TapeNavSubHSM.h" //#include all sub state machines called
+
 /*******************************************************************************
  * PRIVATE #DEFINES                                                            *
  ******************************************************************************/
@@ -41,16 +42,14 @@
 /*******************************************************************************
  * MODULE #DEFINES                                                             *
  ******************************************************************************/
-
-
 typedef enum {
     InitPState,
-    FirstState,
-} TemplateHSMState_t;
+    Navigate,
+} TopHSMState_t;
 
 static const char *StateNames[] = {
 	"InitPState",
-	"FirstState",
+	"Navigate",
 };
 
 
@@ -66,7 +65,7 @@ static const char *StateNames[] = {
 /* You will need MyPriority and the state variable; you may need others as well.
  * The type of state variable should match that of enum in header file. */
 
-static TemplateHSMState_t CurrentState = InitPState; // <- change enum name to match ENUM
+static TopHSMState_t CurrentState = InitPState; // <- change enum name to match ENUM
 static uint8_t MyPriority;
 
 
@@ -84,7 +83,7 @@ static uint8_t MyPriority;
  *        to rename this to something appropriate.
  *        Returns TRUE if successful, FALSE otherwise
  * @author J. Edward Carryer, 2011.10.23 19:25 */
-uint8_t InitTemplateHSM(uint8_t Priority)
+uint8_t InitTopHSM(uint8_t Priority)
 {
     MyPriority = Priority;
     // put us into the Initial PseudoState
@@ -106,7 +105,7 @@ uint8_t InitTemplateHSM(uint8_t Priority)
  *        be posted to. Remember to rename to something appropriate.
  *        Returns TRUE if successful, FALSE otherwise
  * @author J. Edward Carryer, 2011.10.23 19:25 */
-uint8_t PostTemplateHSM(ES_Event ThisEvent)
+uint8_t PostTopHSM(ES_Event ThisEvent)
 {
     return ES_PostToService(MyPriority, ThisEvent);
 }
@@ -126,10 +125,10 @@ uint8_t PostTemplateHSM(ES_Event ThisEvent)
  *       not consumed as these need to pass pack to the higher level state machine.
  * @author J. Edward Carryer, 2011.10.23 19:25
  * @author Gabriel H Elkaim, 2011.10.23 19:25 */
-ES_Event RunTemplateHSM(ES_Event ThisEvent)
+ES_Event RunTopHSM(ES_Event ThisEvent)
 {
     uint8_t makeTransition = FALSE; // use to flag transition
-    TemplateHSMState_t nextState; // <- change type to correct enum
+    TopHSMState_t nextState; // <- change type to correct enum
 
     ES_Tattle(); // trace call stack
 
@@ -141,35 +140,38 @@ ES_Event RunTemplateHSM(ES_Event ThisEvent)
             // transition from the initial pseudo-state into the actual
             // initial state
             // Initialize all sub-state machines
-            InitTemplateSubHSM();
+            InitTapeNavSubHSM();
             // now put the machine into the actual initial state
-            nextState = FirstState;
+            nextState = Navigate;
             makeTransition = TRUE;
             ThisEvent.EventType = ES_NO_EVENT;
             ;
         }
         break;
 
-    case FirstState: // in the first state, replace this with correct names
+    case Navigate: // in the first state, replace this with correct names
         // run sub-state machine for this state
         //NOTE: the SubState Machine runs and responds to events before anything in the this
         //state machine does
-        ThisEvent = RunTemplateSubHSM(ThisEvent);
-        switch (ThisEvent.EventType) {
-        case ES_NO_EVENT:
-        default:
-            break;
+        if (ThisEvent.EventType == ES_ENTRY){
+            InitTapeNavSubHSM();
+            ThisEvent.EventType = ES_NO_EVENT;
+        } else {
+            ThisEvent = RunTapeNavSubHSM(ThisEvent);
         }
         break;
-    default: // all unhandled states fall into here
+        
+        
+    default:
         break;
-    } // end switch on Current State
+ 
+    }
 
     if (makeTransition == TRUE) { // making a state transition, send EXIT and ENTRY
         // recursively call the current state with an exit event
-        RunTemplateHSM(EXIT_EVENT); // <- rename to your own Run function
+        RunTopHSM(EXIT_EVENT); // <- rename to your own Run function
         CurrentState = nextState;
-        RunTemplateHSM(ENTRY_EVENT); // <- rename to your own Run function
+        RunTopHSM(ENTRY_EVENT); // <- rename to your own Run function
     }
 
     ES_Tail(); // trace call stack end

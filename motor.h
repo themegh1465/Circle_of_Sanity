@@ -13,7 +13,6 @@
 #define MOTOR_MAX_SPEED 1000
 
 // Sets up PWM and the direction pins and leaves both motors braked
-// Returns SUCCESS or ERROR
 char Motor_Init(void);
 
 // Sets the left wheel speed, -1000 to 1000
@@ -45,10 +44,6 @@ void Motor_Brake(void);
 
 // turns both enables off and lets the motors spin down on their own
 void Motor_Coast(void);
-
-// Feeds in the measured battery voltage in millivolts so duty is scaled to keep the same effective motor voltage.
-// Call every so often (e.g. from a battery service). Readings below 5 V are ignored. No compensation until called.
-void Motor_SetBatteryMillivolts(uint16_t mv);
 
 // Returns the last speed commanded to the left wheel
 int Motor_GetLeft(void);

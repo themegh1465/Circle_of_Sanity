@@ -32,7 +32,7 @@
 
 // min signal needed to get motors to turn with full robot weight, not just floating
 #define MIN_DUTY 0
-//
+
 
 #define SUCCESS 1
 #define ERROR 0
@@ -76,8 +76,7 @@ static unsigned int SpeedToDuty(int magnitude, int trim)
 }
 
 // drive one side of the H-bridge
-static void ApplyWheel(int speed, int invert, int trimFwd, int trimRev,
-                       unsigned short pwmPin, unsigned short inA, unsigned short inB)
+static void ApplyWheel(int speed, int invert, int trimFwd, int trimRev, unsigned short pwmPin, unsigned short inA, unsigned short inB)
 {
     if (invert) {
         speed = -speed;
@@ -113,15 +112,13 @@ char Motor_Init(void)
 void Motor_SetLeft(int speed)
 {
     leftSpeed = ClampSpeed(speed);
-    ApplyWheel(leftSpeed, LEFT_INVERT, LEFT_TRIM_FWD, LEFT_TRIM_REV,
-               LEFT_PWM_PIN, LEFT_IN_A, LEFT_IN_B);
+    ApplyWheel(leftSpeed, LEFT_INVERT, LEFT_TRIM_FWD, LEFT_TRIM_REV, LEFT_PWM_PIN, LEFT_IN_A, LEFT_IN_B);
 }
 
 void Motor_SetRight(int speed)
 {
     rightSpeed = ClampSpeed(speed);
-    ApplyWheel(rightSpeed, RIGHT_INVERT, RIGHT_TRIM_FWD, RIGHT_TRIM_REV,
-               RIGHT_PWM_PIN, RIGHT_IN_A, RIGHT_IN_B);
+    ApplyWheel(rightSpeed, RIGHT_INVERT, RIGHT_TRIM_FWD, RIGHT_TRIM_REV, RIGHT_PWM_PIN, RIGHT_IN_A, RIGHT_IN_B);
 }
 
 void Motor_Drive(int left, int right)
