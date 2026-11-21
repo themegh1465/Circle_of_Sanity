@@ -18,6 +18,15 @@
 #define RIGHT_IN_A PIN5
 #define RIGHT_IN_B PIN7
 
+//flywheel pinout
+#define FLY_LEFT_PWM_PIN PWM_PORTY10 // Y10 (ENA)
+#define FLY_RIGHT_PWM_PIN PWM_PORTX11 // X11 (ENB)
+#define FLY_DIR_PORT PORTX // dir port (JP7 has to stay open according to uno guide)
+#define FLY_LEFT_IN_A PIN5 // X05
+#define FLY_LEFT_IN_B PIN6 // X06
+#define FLY_RIGHT_IN_A PIN8 // X08
+#define FLY_RIGHT_IN_B PIN10 // X10
+
 #define MOTOR_PWM_FREQ PWM_500HZ // if we chnage this, then we have to recalibrate the trim
 
 // trim levels, keep separate values for forward and backwards
@@ -29,6 +38,14 @@
 // high if the wheels spin backwards relative to the way they were plugged in
 #define LEFT_INVERT 0
 #define RIGHT_INVERT 0
+
+// flywheel trim
+#define FLY_LEFT_TRIM 1000
+#define FLY_RIGHT_TRIM 1000
+
+// motor dir invert
+#define FLY_LEFT_INVERT 0
+#define FLY_RIGHT_INVERT 0
 
 // min signal needed to get motors to turn with full robot weight, not just floating
 #define MIN_DUTY 0
@@ -42,6 +59,7 @@
 
 static int leftSpeed = 0;
 static int rightSpeed = 0;
+static int flywheelSpeed = 0;
 
 static int ClampSpeed(int s)
 {
@@ -173,4 +191,27 @@ int Motor_GetLeft(void){
 }
 int Motor_GetRight(void){ 
     return rightSpeed; 
+}
+
+void Flywheel_SetSpeed(int speed){
+
+    if (speed < 0){
+        speed = 0;
+    }
+    
+    flywheelSpeed = ClampSpeed(speed);
+    
+    ApplyWheel(speed, FLY_LEFT_INVERT, FLY_LEFT_TRIM, FLY_LEFT_TRIM, FLY_LEFT_PWM_PIN, FLY_LEFT_IN_A, FLY_LEFT_IN_B);
+    ApplyWheel(speed, FLY_RIGHT_INVERT, FLY_RIGHT_TRIM, FLY_RIGHT_TRIM, FLY_RIGHT_PWM_PIN, FLY_RIGHT_IN_A, FLY_RIGHT_IN_B);
+}
+
+void Flywheel_Stop(void)
+{
+    flywheelSpeed = 0;
+    PWM_SetDutyCycle(FLY_LEFT_PWM_PIN, 0);
+    PWM_SetDutyCycle(FLY_RIGHT_PWM_PIN, 0);
+}
+
+int Flywheel_GetSpeed(void){
+    return flywheelSpeed;
 }

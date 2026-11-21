@@ -51,5 +51,16 @@ int Motor_GetLeft(void);
 // Returns the last speed commanded to the right wheel
 int Motor_GetRight(void);
 
+// flywheels
+
+// opposite directions and speed 0-1000 scaled by trim
+void Flywheel_SetSpeed(int speed);
+
+// just cuts power, no hard brake
+void Flywheel_Stop(void);
+
+// returns last speed sent to flywheels
+int Flywheel_GetSpeed(void);
+
 #endif // MOTOR_H
 
