@@ -3,9 +3,10 @@
 #include <stdio.h>
 #include "ES_Configure.h"
 #include "ES_Framework.h"
-#include "TapeEventChecker.h"
+#include "EventCheckers.h"
 #include "motor.h"
 #include "NavConfig.h"
+#include "stepper.h"
 #include <AD.h>
 
 void main(void)
@@ -22,7 +23,10 @@ void main(void)
     AD_Init();
     Motor_Init();
     TapeEventChecker_Init();
+    Stepper_Init();
+    Bumper_Init();
     
+    /*
     // now initialize the Events and Services Framework and start it running
     ErrorType = ES_Initialize();
     if (ErrorType == Success) {
@@ -43,7 +47,7 @@ void main(void)
     }
     for (;;)
         ;
-    
+    */
 };
 
 /*------------------------------- Footnotes -------------------------------*/

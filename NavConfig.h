@@ -14,7 +14,7 @@
 #define HARD_TURN 150
 
 // time in ms to declare lost staet if all tape sensors go low
-#define LOST_MS 400
+#define LOST_MS 2000
 
 #define PIVOT_SPEED 700
 #define T_REV_MS 2300 // time for the bot to make one full turn at set pivot speed, THIS NEEDS TO BE CALIBRATED REALYL WELL
@@ -25,7 +25,7 @@
 #define SETTLE_MS 50
 
 #define TURN_MIN_DEG 30
-#define TURN_EXTRA_DEG 20
+#define TURN_EXTRA_DEG 10
 #define TURN_SAFETY_DEG 120
 
 #define APPROACH_SPEED 700 // looking for tape speed

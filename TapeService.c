@@ -97,6 +97,10 @@ ES_Event RunTapeService(ES_Event ThisEvent)
         if (ThisEvent.EventParam != TAPE_DEBOUNCE_TIMER){
             break;
         }
+        // weird reading coming in of all 6 sensors on, throw it away when it comes, noticed after motors switching direction
+        if (pendingBits == 0x3F){
+            break;
+        }
         if (pendingBits != stableBits){
             PostEvent.EventType = TAPE_CHANGED;
             PostEvent.EventParam = ((uint16_t) (pendingBits ^ stableBits) << 8) | pendingBits;

@@ -48,6 +48,7 @@ typedef enum {
     BATTERY_DISCONNECTED,
             TAPE_RAW,
             TAPE_CHANGED,
+            BUMPER_CHANGED,
 	/* User-defined events end here */
     NUMBEROFEVENTS,
 } ES_EventTyp_t;
@@ -67,6 +68,7 @@ static const char *EventNames[] = {
 	"BATTERY_DISCONNECTED",
     "TAPE_RAW",
     "TAPE_CHANGED",
+    "BUMPER_CHANGED",
 	"NUMBEROFEVENTS",
 };
 
@@ -75,11 +77,11 @@ static const char *EventNames[] = {
 
 /****************************************************************************/
 // This are the name of the Event checking function header file.
-#define EVENT_CHECK_HEADER "TapeEventChecker.h"
+#define EVENT_CHECK_HEADER "EventCheckers.h"
 
 /****************************************************************************/
 // This is the list of event checking functions
-#define EVENT_CHECK_LIST  CheckTape
+#define EVENT_CHECK_LIST  CheckTape, CheckBumpers
 
 /****************************************************************************/
 // These are the definitions for the post functions to be executed when the
