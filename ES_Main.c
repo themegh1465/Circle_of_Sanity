@@ -6,7 +6,7 @@
 #include "EventCheckers.h"
 #include "motor.h"
 #include "NavConfig.h"
-#include "stepper.h"
+#include "AmmoDisc.h"
 #include <AD.h>
 
 void main(void)
@@ -23,7 +23,7 @@ void main(void)
     AD_Init();
     Motor_Init();
     TapeEventChecker_Init();
-    Stepper_Init();
+    Ammo_Init();
     Bumper_Init();
     
     /*
