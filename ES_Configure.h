@@ -49,6 +49,7 @@ typedef enum {
             TAPE_RAW,
             TAPE_CHANGED,
             BUMPER_CHANGED,
+            STEPPER_DONE,
 	/* User-defined events end here */
     NUMBEROFEVENTS,
 } ES_EventTyp_t;
@@ -69,6 +70,7 @@ static const char *EventNames[] = {
     "TAPE_RAW",
     "TAPE_CHANGED",
     "BUMPER_CHANGED",
+    "STEPPER_DONE",
 	"NUMBEROFEVENTS",
 };
 
@@ -81,7 +83,7 @@ static const char *EventNames[] = {
 
 /****************************************************************************/
 // This is the list of event checking functions
-#define EVENT_CHECK_LIST  CheckTape, CheckBumpers
+#define EVENT_CHECK_LIST  CheckTape, CheckBumpers, CheckAmmoDisc
 
 /****************************************************************************/
 // These are the definitions for the post functions to be executed when the

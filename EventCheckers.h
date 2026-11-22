@@ -3,5 +3,6 @@
 
 #include "TapeEventChecker.h"
 #include "BumperEventChecker.h"
+#include "AmmoDisc.h"
 
 #endif

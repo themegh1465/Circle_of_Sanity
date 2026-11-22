@@ -32,9 +32,10 @@
       <itemPath>C:/Users/meghp/MPLABXProjects/Circle_of_Sanity.X/TopHSM.h</itemPath>
       <itemPath>C:/Users/meghp/MPLABXProjects/Circle_of_Sanity.X/TapeNavSubHSM.h</itemPath>
       <itemPath>C:/Users/meghp/MPLABXProjects/Circle_of_Sanity.X/NavConfig.h</itemPath>
-      <itemPath>C:/Users/meghp/MPLABXProjects/Circle_of_Sanity.X/stepper.h</itemPath>
       <itemPath>C:/Users/meghp/MPLABXProjects/Circle_of_Sanity.X/EventCheckers.h</itemPath>
       <itemPath>C:/Users/meghp/MPLABXProjects/Circle_of_Sanity.X/BumperEventChecker.h</itemPath>
+      <itemPath>C:/Users/meghp/MPLABXProjects/Circle_of_Sanity.X/Stepper.h</itemPath>
+      <itemPath>C:/Users/meghp/MPLABXProjects/Circle_of_Sanity.X/AmmoDisc.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -83,8 +84,9 @@
       <itemPath>C:/Users/meghp/MPLABXProjects/Circle_of_Sanity.X/ES_Main.c</itemPath>
       <itemPath>C:/Users/meghp/MPLABXProjects/Circle_of_Sanity.X/TopHSM.c</itemPath>
       <itemPath>C:/Users/meghp/MPLABXProjects/Circle_of_Sanity.X/TapeNavSubHSM.c</itemPath>
-      <itemPath>C:/Users/meghp/MPLABXProjects/Circle_of_Sanity.X/stepper.c</itemPath>
       <itemPath>C:/Users/meghp/MPLABXProjects/Circle_of_Sanity.X/BumperEventChecker.c</itemPath>
+      <itemPath>C:/Users/meghp/MPLABXProjects/Circle_of_Sanity.X/Stepper.c</itemPath>
+      <itemPath>C:/Users/meghp/MPLABXProjects/Circle_of_Sanity.X/AmmoDisc.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
