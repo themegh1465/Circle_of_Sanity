@@ -50,6 +50,7 @@ typedef enum {
             TAPE_CHANGED,
             BUMPER_CHANGED,
             STEPPER_DONE,
+            BEACON_SCAN_DONE,
 	/* User-defined events end here */
     NUMBEROFEVENTS,
 } ES_EventTyp_t;
@@ -71,6 +72,7 @@ static const char *EventNames[] = {
     "TAPE_CHANGED",
     "BUMPER_CHANGED",
     "STEPPER_DONE",
+    "BEACON_SCAN_DONE",
 	"NUMBEROFEVENTS",
 };
 

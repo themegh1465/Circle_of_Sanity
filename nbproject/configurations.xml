@@ -36,6 +36,7 @@
       <itemPath>C:/Users/meghp/MPLABXProjects/Circle_of_Sanity.X/BumperEventChecker.h</itemPath>
       <itemPath>C:/Users/meghp/MPLABXProjects/Circle_of_Sanity.X/Stepper.h</itemPath>
       <itemPath>C:/Users/meghp/MPLABXProjects/Circle_of_Sanity.X/AmmoDisc.h</itemPath>
+      <itemPath>C:/Users/meghp/MPLABXProjects/Circle_of_Sanity.X/BeaconDetector.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -87,6 +88,7 @@
       <itemPath>C:/Users/meghp/MPLABXProjects/Circle_of_Sanity.X/BumperEventChecker.c</itemPath>
       <itemPath>C:/Users/meghp/MPLABXProjects/Circle_of_Sanity.X/Stepper.c</itemPath>
       <itemPath>C:/Users/meghp/MPLABXProjects/Circle_of_Sanity.X/AmmoDisc.c</itemPath>
+      <itemPath>C:/Users/meghp/MPLABXProjects/Circle_of_Sanity.X/BeaconDetector.c</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
