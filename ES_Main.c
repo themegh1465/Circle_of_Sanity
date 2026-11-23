@@ -9,6 +9,15 @@
 #include "AmmoDisc.h"
 #include <AD.h>
 
+#define TICKS_PER_MS 40000UL
+
+
+static void Wait(unsigned long ms)
+{
+    unsigned long start = _CP0_GET_COUNT();
+    while ((unsigned long) (_CP0_GET_COUNT() - start) < ms * TICKS_PER_MS) { }
+}
+
 void main(void)
 {
     ES_Return_t ErrorType;
@@ -25,6 +34,17 @@ void main(void)
     TapeEventChecker_Init();
     Ammo_Init();
     Bumper_Init();
+    
+
+    printf("Flywheel test\r\n");
+    Wait(2000);
+    printf("\nRamping up now");
+    Flywheel_SetSpeed(500);
+    Wait(30000);
+    printf("\nStopping now, letting wheels slow down for 10 sec");
+    Flywheel_Stop();
+    Wait(10000);
+    printf("\ntest done");
     
     /*
     // now initialize the Events and Services Framework and start it running

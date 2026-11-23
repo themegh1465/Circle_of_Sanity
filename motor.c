@@ -21,7 +21,7 @@
 //flywheel pinout
 #define FLY_LEFT_PWM_PIN PWM_PORTY10 // Y10 (ENA)
 #define FLY_RIGHT_PWM_PIN PWM_PORTX11 // X11 (ENB)
-#define FLY_DIR_PORT PORTX // dir port (JP7 has to stay open according to uno guide)
+#define FLY_DIR_PORT PORTX // dir port for flywheels
 #define FLY_LEFT_IN_A PIN5 // X05
 #define FLY_LEFT_IN_B PIN6 // X06
 #define FLY_RIGHT_IN_A PIN8 // X08
@@ -41,7 +41,7 @@
 
 // flywheel trim
 #define FLY_LEFT_TRIM 1000
-#define FLY_RIGHT_TRIM 1000
+#define FLY_RIGHT_TRIM 900
 
 // motor dir invert
 #define FLY_LEFT_INVERT 0
@@ -94,7 +94,7 @@ static unsigned int SpeedToDuty(int magnitude, int trim)
 }
 
 // drive one side of the H-bridge
-static void ApplyWheel(int speed, int invert, int trimFwd, int trimRev, unsigned short pwmPin, unsigned short inA, unsigned short inB)
+static void ApplyWheel(int speed, int invert, int trimFwd, int trimRev, unsigned short pwmPin, int8_t port, unsigned short inA, unsigned short inB)
 {
     if (invert) {
         speed = -speed;
@@ -102,12 +102,12 @@ static void ApplyWheel(int speed, int invert, int trimFwd, int trimRev, unsigned
 
     // if forward then A goes high and B goes low
     if (speed > 0) {
-        IO_PortsSetPortBits(DIR_PORT, inA);
-        IO_PortsClearPortBits(DIR_PORT, inB);
+        IO_PortsSetPortBits(port, inA);
+        IO_PortsClearPortBits(port, inB);
         PWM_SetDutyCycle(pwmPin, SpeedToDuty(speed, trimFwd));
     } else if (speed < 0) { // reverse
-        IO_PortsClearPortBits(DIR_PORT, inA);
-        IO_PortsSetPortBits(DIR_PORT, inB);
+        IO_PortsClearPortBits(port, inA);
+        IO_PortsSetPortBits(port, inB);
         PWM_SetDutyCycle(pwmPin, SpeedToDuty(-speed, trimRev));
     } else if (speed == 0){
         PWM_SetDutyCycle(pwmPin, 0);
@@ -119,24 +119,26 @@ char Motor_Init(void)
     char ok = SUCCESS;
     if (PWM_Init() == ERROR) ok = ERROR;
     if (PWM_SetFrequency(MOTOR_PWM_FREQ) == ERROR) ok = ERROR;
-    if (PWM_AddPins(LEFT_PWM_PIN | RIGHT_PWM_PIN) == ERROR) ok = ERROR;
+    if (PWM_AddPins(LEFT_PWM_PIN | RIGHT_PWM_PIN | FLY_LEFT_PWM_PIN | FLY_RIGHT_PWM_PIN) == ERROR) ok = ERROR;
 
     IO_PortsSetPortOutputs(DIR_PORT, LEFT_IN_A | LEFT_IN_B | RIGHT_IN_A | RIGHT_IN_B); // portz, z03, z04, z05, z07
+    IO_PortsSetPortOutputs(FLY_DIR_PORT, FLY_LEFT_IN_A | FLY_LEFT_IN_B | FLY_RIGHT_IN_A | FLY_RIGHT_IN_B); // portx, x05, x06, x08, x10
 
     Motor_Brake(); // start with dead zero
+    Flywheel_Stop();
     return ok; 
 }
 
 void Motor_SetLeft(int speed)
 {
     leftSpeed = ClampSpeed(speed);
-    ApplyWheel(leftSpeed, LEFT_INVERT, LEFT_TRIM_FWD, LEFT_TRIM_REV, LEFT_PWM_PIN, LEFT_IN_A, LEFT_IN_B);
+    ApplyWheel(leftSpeed, LEFT_INVERT, LEFT_TRIM_FWD, LEFT_TRIM_REV, LEFT_PWM_PIN, DIR_PORT, LEFT_IN_A, LEFT_IN_B);
 }
 
 void Motor_SetRight(int speed)
 {
     rightSpeed = ClampSpeed(speed);
-    ApplyWheel(rightSpeed, RIGHT_INVERT, RIGHT_TRIM_FWD, RIGHT_TRIM_REV, RIGHT_PWM_PIN, RIGHT_IN_A, RIGHT_IN_B);
+    ApplyWheel(rightSpeed, RIGHT_INVERT, RIGHT_TRIM_FWD, RIGHT_TRIM_REV, RIGHT_PWM_PIN, DIR_PORT, RIGHT_IN_A, RIGHT_IN_B);
 }
 
 void Motor_Drive(int left, int right)
@@ -201,8 +203,8 @@ void Flywheel_SetSpeed(int speed){
     
     flywheelSpeed = ClampSpeed(speed);
     
-    ApplyWheel(speed, FLY_LEFT_INVERT, FLY_LEFT_TRIM, FLY_LEFT_TRIM, FLY_LEFT_PWM_PIN, FLY_LEFT_IN_A, FLY_LEFT_IN_B);
-    ApplyWheel(speed, FLY_RIGHT_INVERT, FLY_RIGHT_TRIM, FLY_RIGHT_TRIM, FLY_RIGHT_PWM_PIN, FLY_RIGHT_IN_A, FLY_RIGHT_IN_B);
+    ApplyWheel(speed, FLY_LEFT_INVERT, FLY_LEFT_TRIM, FLY_LEFT_TRIM, FLY_LEFT_PWM_PIN, FLY_DIR_PORT, FLY_LEFT_IN_A, FLY_LEFT_IN_B);
+    ApplyWheel(speed, FLY_RIGHT_INVERT, FLY_RIGHT_TRIM, FLY_RIGHT_TRIM, FLY_RIGHT_PWM_PIN, FLY_DIR_PORT, FLY_RIGHT_IN_A, FLY_RIGHT_IN_B);
 }
 
 void Flywheel_Stop(void)
