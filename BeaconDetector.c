@@ -21,12 +21,14 @@ finer than the 5 degree bins and doesnt get fooled by a flat topped peak.
 #include "TopHSM.h"
 #include "NavConfig.h"
 #include "BeaconDetector.h"
+#include <stdio.h>
+#include "serial.h"
 
 /*******************************************************************************
  * MODULE #DEFINES                                                             *
  ******************************************************************************/
 
-#define BEACON_PIN AD_PORTW4
+#define BEACON_PIN AD_PORTW5
 
 #define NUM_BINS 72 // 5 degrees per bin
 #define BEACON_MIN_RISE 60 // minimum counts above floor seen to classify as a peak (ideally we would want to gain signal if this is not met) ~0.2V
@@ -213,11 +215,35 @@ uint16_t Beacon_GetWidthDeg(void)
     return widthDeg;
 }
 
+
+
+//debug serial print to see bin values to verify peaks
+
+void Beacon_PrintScan(void)
+{
+    int i;
+    uint16_t half = floorLevel + (peakLevel - floorLevel) / 2;
+
+    printf("\r\nscan: found %d  angle %d  width %u  floor %u  peak %u  half %u\r\n",
+            found, angleDeg, widthDeg, floorLevel, peakLevel, half);
+    for (i = 0; i < NUM_BINS; i++) {
+        printf("%3d:%4u/%4u/%3u%c ", i * 360 / NUM_BINS,
+                binCount[i] ? (unsigned) (binSum[i] / binCount[i]) : 0u,
+                profile[i], binCount[i], (profile[i] >= half) ? '*' : ' ');
+        if (i % 6 == 5) {
+            printf("\r\n");
+            while (!IsTransmitEmpty()) { } // serial buffer is 512 bytes, let it drain
+        }
+    }
+}
+
+
 uint8_t CheckBeacon(void)
 {
     ES_Event thisEvent;
     uint32_t elapsed;
     int bin;
+    uint16_t level;
 
     if (!scanning) {
         return FALSE;
@@ -226,8 +252,12 @@ uint8_t CheckBeacon(void)
     elapsed = ES_Timer_GetTime() - scanStart;
     if (elapsed < T_REV_MS) {
         // still spinning, drop this reading into the bin for this angle
-        bin = (int) ((elapsed * NUM_BINS) / T_REV_MS);
-        binSum[bin] += FilterSample(Beacon_ReadLevel());
+                bin = (int) ((elapsed * NUM_BINS) / T_REV_MS);
+        level = Beacon_ReadLevel();
+        if (level > 1023) {
+            return FALSE; 
+        }
+        binSum[bin] += FilterSample(level);
         binCount[bin]++;
         return FALSE;
     }

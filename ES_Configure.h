@@ -51,6 +51,8 @@ typedef enum {
             BUMPER_CHANGED,
             STEPPER_DONE,
             BEACON_SCAN_DONE,
+            OPPONENT_DONE,
+            BANNER_CHANGED,
 	/* User-defined events end here */
     NUMBEROFEVENTS,
 } ES_EventTyp_t;
@@ -73,6 +75,8 @@ static const char *EventNames[] = {
     "BUMPER_CHANGED",
     "STEPPER_DONE",
     "BEACON_SCAN_DONE",
+    "OPPONENT_DONE",
+    "BANNER_CHANGED",
 	"NUMBEROFEVENTS",
 };
 
@@ -85,7 +89,7 @@ static const char *EventNames[] = {
 
 /****************************************************************************/
 // This is the list of event checking functions
-#define EVENT_CHECK_LIST  CheckTape, CheckBumpers, CheckAmmoDisc
+#define EVENT_CHECK_LIST  CheckTape, CheckBumpers, CheckAmmoDisc, CheckBeacon, CheckBanner
 
 /****************************************************************************/
 // These are the definitions for the post functions to be executed when the
@@ -96,7 +100,7 @@ static const char *EventNames[] = {
 #define TIMER1_RESP_FUNC PostTopHSM
 #define TIMER2_RESP_FUNC PostTopHSM
 #define TIMER3_RESP_FUNC PostTopHSM
-#define TIMER4_RESP_FUNC TIMER_UNUSED
+#define TIMER4_RESP_FUNC PostTopHSM
 #define TIMER5_RESP_FUNC TIMER_UNUSED
 #define TIMER6_RESP_FUNC TIMER_UNUSED
 #define TIMER7_RESP_FUNC TIMER_UNUSED
@@ -120,6 +124,7 @@ static const char *EventNames[] = {
 #define NAV_MOTION_TIMER 1
 #define NAV_GUARD_TIMER 2
 #define NAV_LOST_TIMER 3
+#define SHOOT_TIMER 4
 
 
 /****************************************************************************/

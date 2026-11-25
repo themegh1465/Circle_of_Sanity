@@ -4,5 +4,7 @@
 #include "TapeEventChecker.h"
 #include "BumperEventChecker.h"
 #include "AmmoDisc.h"
+#include "BeaconDetector.h"
+#include "BannerEventChecker.h"
 
 #endif

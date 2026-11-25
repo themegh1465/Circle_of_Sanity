@@ -9,6 +9,16 @@
 #include "AmmoDisc.h"
 #include <AD.h>
 
+
+#define TICKS_PER_MS 40000UL // core timer runs at 40 MHz
+
+// busy wait, only for bench tests outside the ES framework
+static void Wait(unsigned long ms)
+{
+    unsigned long start = _CP0_GET_COUNT();
+    while ((unsigned long) (_CP0_GET_COUNT() - start) < ms * TICKS_PER_MS) { }
+}
+
 void main(void)
 {
     ES_Return_t ErrorType;
@@ -25,8 +35,19 @@ void main(void)
     TapeEventChecker_Init();
     Ammo_Init();
     Bumper_Init();
-    
+    Beacon_Init();
+    Stepper_Init();
+    Banner_Init();
+   
     /*
+    Wait(2000);
+    Motor_PivotCW(PIVOT_SPEED);
+    Wait(T_REV_MS);
+    Motor_Brake();
+    */
+    
+    
+    Wait(2000);
     // now initialize the Events and Services Framework and start it running
     ErrorType = ES_Initialize();
     if (ErrorType == Success) {
@@ -47,7 +68,7 @@ void main(void)
     }
     for (;;)
         ;
-    */
+    
 };
 
 /*------------------------------- Footnotes -------------------------------*/

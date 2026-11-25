@@ -392,6 +392,7 @@ void __ISR(_ADC_VECTOR, IPL1SOFT) ADCIntHandler(void)
         CurFilt_BatVoltage = Filt_BatVoltage;
         SampleCount = 0;
         //check for battery undervoltage check
+        /*
         if ((CurFilt_BatVoltage <= BAT_VOLTAGE_LOCKOUT) && (PrevFilt_BatVoltage <= BAT_VOLTAGE_LOCKOUT) && (AD_ReadADPin(BAT_VOLTAGE_MONITOR) > BAT_VOLTAGE_NO_BAT)) {
             BOARD_End();
             while (1) {
@@ -399,6 +400,7 @@ void __ISR(_ADC_VECTOR, IPL1SOFT) ADCIntHandler(void)
                 while (!IsTransmitEmpty());
             }
         }
+        */
     }
     //if pins are changed add pins
     if (PinsToAdd | PinsToRemove) {

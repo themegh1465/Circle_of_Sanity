@@ -36,6 +36,8 @@
 #include "TapeEventChecker.h"
 #include "TapeService.h"
 #include "NavConfig.h"
+#include "BeaconDetector.h"
+#include <stdio.h>
 
 /*******************************************************************************
  * MODULE #DEFINES                                                             *
@@ -283,6 +285,19 @@ ES_Event RunTapeNavSubHSM(ES_Event ThisEvent)
                         ES_Timer_StopTimer(NAV_LOST_TIMER);
                     }
                     
+                }
+                ThisEvent.EventType = ES_NO_EVENT;
+                break;
+                
+                // extra check to make sure we are really at a slime tower banner or reading off dead bot with banner
+            case BANNER_CHANGED:
+                if (ThisEvent.EventParam == 1) {
+                    uint16_t level = Beacon_ReadLevel();
+                    if (level < BANNER_VETO_LEVEL) {
+                        printf("banner REAL  beacon %u\r\n", level); // placeholder, call the slime tower subHSM 
+                    } else {
+                        printf("banner VETO  beacon %u\r\n", level); // ignore the event, just post ES_NO_EVENT here for now 
+                    }
                 }
                 ThisEvent.EventType = ES_NO_EVENT;
                 break;

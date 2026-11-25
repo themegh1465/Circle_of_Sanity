@@ -28,4 +28,7 @@ uint16_t Beacon_GetWidthDeg(void); // how wide the peak is at half height, degre
 // event checker
 uint8_t CheckBeacon(void);
 
+//debug
+void Beacon_PrintScan(void);
+
 #endif

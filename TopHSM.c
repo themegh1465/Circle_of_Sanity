@@ -33,6 +33,7 @@
 #include "BOARD.h"
 #include "TopHSM.h"
 #include "TapeNavSubHSM.h" //#include all sub state machines called
+#include "OpponentSubHSM.h"
 
 /*******************************************************************************
  * PRIVATE #DEFINES                                                            *
@@ -45,11 +46,13 @@
 typedef enum {
     InitPState,
     Navigate,
+            EngageOpponent,
 } TopHSMState_t;
 
 static const char *StateNames[] = {
 	"InitPState",
 	"Navigate",
+    "EngageOpponent",
 };
 
 
@@ -140,12 +143,25 @@ ES_Event RunTopHSM(ES_Event ThisEvent)
             // transition from the initial pseudo-state into the actual
             // initial state
             // Initialize all sub-state machines
-            InitTapeNavSubHSM();
             // now put the machine into the actual initial state
-            nextState = Navigate;
+            nextState = EngageOpponent;
             makeTransition = TRUE;
             ThisEvent.EventType = ES_NO_EVENT;
             ;
+        }
+        break;
+        
+    case EngageOpponent:
+        if (ThisEvent.EventType == ES_ENTRY){
+            InitOpponentSubHSM();
+            ThisEvent.EventType = ES_NO_EVENT;
+        } else {
+            ThisEvent = RunOpponentSubHSM(ThisEvent);
+            if (ThisEvent.EventType == OPPONENT_DONE){ // shots done, or no beacon found
+                nextState = Navigate;
+                makeTransition = TRUE;
+                ThisEvent.EventType = ES_NO_EVENT;
+            }
         }
         break;
 
